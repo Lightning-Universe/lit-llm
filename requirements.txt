@@ -1,0 +1,6 @@
+lit_gpt git+https://github.com/Lightning-AI/lit-gpt
+huggingface_hub
+tokenizers
+sentencepiece
+safetensors
+jsonargparse[signatures]
