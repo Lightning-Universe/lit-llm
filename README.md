@@ -1,4 +1,4 @@
-# LLM Finetune - Phi 1.5
+# LLM Finetune Quest
 
 This studio lets you fine-tune a Phi 1.5 base model using instruction-tuning data.
 
