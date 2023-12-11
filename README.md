@@ -78,3 +78,23 @@ You can chat with the resulting model just like previously, only creating the ch
 with finetuned.chat(temperature=0.2) as chat:
     response = chat.generate(prompt="What do you think about pineapple pizza?")
 ```
+
+### Start an API inference server
+
+You can serve each model through an API server this way
+
+```python
+finetuned.serve(port=8000)
+```
+
+You can send a request to the server using
+
+```bash
+python client.py "What do you think about pineapple pizza?"
+```
+
+in a separate terminal, or equivalently make a cURL request
+
+```bash
+curl -H "Content-Type: application/json" -H "X-API-KEY: 1234567890" -X POST -d '{"prompt":"What do you think about pineapple pizza?", "temperature": 0.2}' 127.0.0.1:8000/chat
+```
