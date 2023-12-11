@@ -82,6 +82,8 @@ def finetune(
 
 
 def train(fabric, hparams):
+    torch.set_float32_matmul_precision("high")
+
     check_valid_checkpoint_dir(hparams.checkpoint_dir)
 
     fabric.seed_everything(1337)  # same seed for every process to init model (FSDP)
@@ -248,8 +250,6 @@ def get_batch(fabric, data, hparams):
 
 
 if __name__ == "__main__":
-    torch.set_float32_matmul_precision("high")
-
     from jsonargparse import CLI
 
     CLI(finetune)

@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 from typing import Optional
 
-from llm import download_model, finetune, prepare_dataset, setup_chat, chat
+from llm import download_model, finetune, prepare_dataset, setup_chat, chat, serve
 
 
 class Dataset:
@@ -40,8 +40,19 @@ class Chat:
         self.llm = llm
         self.config = config
     
-    def generate(self, prompt=""):
-        return chat(**self.config, prompt=prompt)
+    def generate(self, prompt="", temperature=None):
+        config = self.config.copy()
+        if temperature is not None:
+            config["temperature"] = temperature
+        for word in chat(**config, prompt=prompt):
+            print(word, end="", flush=True)
+        print()
+
+    def stream(self, prompt="", temperature=None):
+        config = self.config.copy()
+        if temperature is not None:
+            config["temperature"] = temperature
+        return chat(**config, prompt=prompt)
 
 
 class LLM:
@@ -93,6 +104,8 @@ class LLM:
         eval_iters: int = 100,
         log_interval: int = 1,
     ):
+        # TODO: add "mode" argument to provide sets of defalts
+
         prefix = f"{self.model_name}-{dataset.name}-"
         existing_dirs = self.checkpoint_dir.parent.parent.glob(f"{prefix}*")
         existing_dirs = [el for el in existing_dirs if el.name[-4:].isnumeric()]
@@ -143,7 +156,7 @@ class LLM:
         return finetuned
     
     @contextmanager
-    def chat(self, temperature = 0.2):
+    def chat(self, temperature=0.2):
         # if model is not set up for chat, set it up
         chat_config = setup_chat(
             model_name=self.model_name,
@@ -159,3 +172,13 @@ class LLM:
         finally:
             chat = None
             # gc
+
+    def serve(self, temperature=0.2, device_ids=[0], port=8000, timeout_keep_alive=20, blocking=True):
+        serve(
+            llm=self,
+            temperature=temperature,
+            device_ids=device_ids,
+            port=port,
+            timeout_keep_alive=timeout_keep_alive,
+            blocking=blocking
+        )

@@ -99,11 +99,11 @@ def decode(fabric: L.Fabric, tokenizer: Tokenizer, token_stream: Iterator[torch.
     if tokenizer.backend == "huggingface":
         try:
             for token in token_stream:
-                fabric.print(tokenizer.decode(token), end="", flush=True)
+                yield tokenizer.decode(token)
                 tokens_generated += 1
         except KeyboardInterrupt:
             # support stopping generation
-            return tokens_generated
+            return
     elif tokenizer.backend == "sentencepiece":
         # sentencepiece does not support decoding token-by-token because it adds spaces based on the surrounding tokens
         # meaning that we need to decode everything each time
@@ -113,15 +113,15 @@ def decode(fabric: L.Fabric, tokenizer: Tokenizer, token_stream: Iterator[torch.
             for token in token_stream:
                 so_far = torch.cat((so_far, token.view(-1)))
                 decoded_new = tokenizer.decode(so_far)
-                fabric.print(decoded_new[len(decoded_so_far) :], end="", flush=True)
+                yield decoded_new[len(decoded_so_far) :]
                 decoded_so_far = decoded_new
                 tokens_generated += 1
         except KeyboardInterrupt:
             # support stopping generation
-            return tokens_generated
+            return
     else:
         raise NotImplementedError(tokenizer.backend)
-    return tokens_generated
+    return
 
 
 def setup_chat(
@@ -147,6 +147,8 @@ def setup_chat(
         precision: Indicates the Fabric precision setting to use.
         compile: Whether to use compilation to speed up token generation. Will increase startup time.
     """
+    torch.set_float32_matmul_precision("high")
+
     checkpoint_dir = Path.home() / "checkpoints" / model_name
 
     precision = precision or get_default_supported_precision(training=False)
@@ -200,27 +202,30 @@ def setup_chat(
     )
 
 
-def chat(*, fabric, model, tokenizer, system_prompt, stop_tokens, temperature, top_k, prompt=""):
+def chat(*, fabric, model, tokenizer, system_prompt, stop_tokens, temperature, top_k, log_toks=True, prompt=""):
     prompt = system_prompt.format(prompt=prompt)
     encoded_prompt = tokenizer.encode(prompt, device=fabric.device)
     y = generate(
         model, encoded_prompt, model.max_seq_length, temperature=temperature, top_k=top_k, stop_tokens=stop_tokens
     )
     t0 = time.perf_counter()
-    tokens_generated = decode(fabric, tokenizer, y)
+    count = 0
+    generated = decode(fabric, tokenizer, y)
+    for word in generated:
+        count += 1
+        yield word
     t = time.perf_counter() - t0
+    
     for block in model.transformer.h:
         block.attn.kv_cache.reset_parameters()
-    fabric.print(
-        f"\nTime for inference: {t:.02f} sec total, {tokens_generated / t:.02f} tokens/sec, {tokens_generated} tokens", file=sys.stderr
-    )
-    fabric.print()
+
+    if log_toks:
+        fabric.print(
+            f"\n\nTime for inference: {t:.02f} sec total, {count / t:.02f} tokens/sec, {count} tokens", file=sys.stderr
+        )
 
 
 if __name__ == "__main__":
-    torch.set_float32_matmul_precision("high")
-
-    chat = create_chat(model_name="microsoft/phi-1_5")
-
+    chat_config = setup_chat(model_name="microsoft/phi-1_5")
     prompt = " ".join(sys.argv[1:])
-    chat(prompt=prompt)
+    chat(**chat_config, prompt=prompt)
