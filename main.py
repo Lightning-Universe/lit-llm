@@ -1,16 +1,16 @@
 from pprint import pprint
 
-import llm
+import lit
 
 
 def main():
-    model = llm.LLM("microsoft/phi-1_5")
+    model = lit.LLM("microsoft/phi-1_5")
 
     with model.chat(temperature=0.2) as chat:
         response = chat.generate(prompt="What do you think about pineapple pizza?")
 
     alpaca = model.prepare_dataset("alpaca")
-    # To skip preparation, just create the get dataset directly:
+    # # To skip preparation, just create the get dataset directly:
     # alpaca = model.get_dataset("alpaca")
 
     finetuned = model.finetune(dataset=alpaca, max_iter=100)
@@ -26,6 +26,7 @@ def main():
     # python client.py "What do you think about pineapple pizza?"
     # in a separate terminal, or equivalently make a cURL request
     # curl -H "Content-Type: application/json" -H "X-API-KEY: 1234567890" -X POST -d '{"prompt":"What do you think about pineapple pizza?", "temperature": 0.2}' 127.0.0.1:8000/chat
+
 
 if __name__ == "__main__":
     main()

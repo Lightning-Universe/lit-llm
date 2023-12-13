@@ -15,7 +15,7 @@ from lit_gpt.utils import (
     load_checkpoint,
 )
 
-from llm.prompt_config import prompt_config
+from lit.prompt_config import prompt_config
 
 
 def multinomial_num_samples_1(probs: torch.Tensor) -> torch.Tensor:
@@ -129,7 +129,7 @@ def setup_chat(
     checkpoint: Optional[str] = None,
     top_k: Optional[int] = 200,
     temperature: float = 0.2,
-    quantize: Optional[Literal["bnb.nf4", "bnb.nf4-dq", "bnb.fp4", "bnb.fp4-dq"]] = None,
+    quantize: Optional[Literal["nf4"]] = None,
     precision: Optional[str] = None,
     compile: bool = False,
 ):
@@ -154,7 +154,7 @@ def setup_chat(
     precision = precision or get_default_supported_precision(training=False)
 
     plugins = None
-    if quantize is not None and quantize.startswith("bnb."):
+    if quantize is not None and quantize == "nf4":
         if "mixed" in precision:
             raise ValueError("Quantization and mixed precision is not supported.")
         dtype = {"16-true": torch.float16, "bf16-true": torch.bfloat16, "32-true": torch.float32}[precision]

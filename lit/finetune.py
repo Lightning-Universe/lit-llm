@@ -2,12 +2,13 @@ import os
 from pathlib import Path
 import sys
 import time
-from typing import Optional
+from typing import Optional, Literal
 
 import lightning as L
 import torch
-from lightning.fabric.loggers import CSVLogger
+from lightning.fabric.loggers import CSVLogger, TensorBoardLogger
 from lightning.fabric.strategies import FSDPStrategy
+from lightning.fabric.plugins import BitsandbytesPrecision
 
 from lit_gpt.lora import (
     GPT,
@@ -53,6 +54,7 @@ def finetune(
     save_interval: int = 100,
     eval_iters: int = 100,
     log_interval: int = 1,
+    quantize: Optional[Literal["nf4"]] = None,
 ):
     checkpoint_dir = Path("checkpoints") / model_name
     data_dir = Path(data_dir)
@@ -66,16 +68,23 @@ def finetune(
 
     strategy = "auto"
 
-    if torch.cuda.device_count() > 1:
+    if torch.cuda.device_count() > 1 and not quantize:
         strategy = FSDPStrategy(
             auto_wrap_policy={Block},
             activation_checkpointing_policy={Block},
             state_dict_type="full",
         )
 
-    logger = CSVLogger(out_dir.parent, flush_logs_every_n_steps=log_interval)
+    plugins = None
+    if quantize and torch.cuda.is_available():
+        dtype = {"16-true": torch.float16, "bf16-true": torch.bfloat16, "32-true": torch.float32}[precision]
+        plugins = BitsandbytesPrecision(quantize[4:], dtype)
+        precision = None
 
-    fabric = L.Fabric(strategy=strategy, precision=precision, loggers=logger)
+    # logger = CSVLogger(out_dir.parent, flush_logs_every_n_steps=log_interval)
+    logger = TensorBoardLogger(root_dir=out_dir.parent)
+
+    fabric = L.Fabric(strategy=strategy, precision=precision, loggers=logger, plugins=plugins)
     fabric.launch(train, hparams)
 
     return hparams
@@ -123,7 +132,12 @@ def train(fabric, hparams):
 
     trainable_params = [p for p in model.parameters() if p.requires_grad]
 
-    optimizer = torch.optim.AdamW(trainable_params, lr=hparams.learning_rate, weight_decay=hparams.weight_decay)
+    if isinstance(fabric.strategy.precision, BitsandbytesPrecision):
+        import bitsandbytes as bnb
+        optimizer = bnb.optim.PagedAdamW(trainable_params, lr=hparams.learning_rate, weight_decay=hparams.weight_decay)
+    else:
+        optimizer = torch.optim.AdamW(trainable_params, lr=hparams.learning_rate, weight_decay=hparams.weight_decay)
+
     optimizer = fabric.setup_optimizers(optimizer)
 
     # strict=False because missing keys due to LoRA weights not contained in state dict
@@ -188,6 +202,7 @@ def train(fabric, hparams):
                 f"iter {iter_num} step {step_count}: loss {loss_item:.4f}, iter time:"
                 f" {(t1 - iter_t0) * 1000:.2f}ms{' (optimizer.step)' if not is_accumulating else ''}"
             )
+            fabric.log("train_loss", loss_item)
 
         if not is_accumulating and step_count % hparams.eval_interval == 0:
             t0 = time.perf_counter()
@@ -202,6 +217,7 @@ def train(fabric, hparams):
                 model.train()
             t1 = time.perf_counter() - t0
             fabric.print(f"step {iter_num}: val loss {val_loss.item():.4f}, val time: {t1 * 1000:.2f}ms")
+            fabric.log("val_loss", val_loss.item())
             fabric.barrier()
 
         if not is_accumulating and step_count % hparams.save_interval == 0:

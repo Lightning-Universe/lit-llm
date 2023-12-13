@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from llm.models import convert_hf_checkpoint, download
+from lit.models import convert_hf_checkpoint, download
 
 def download_model(
     model_name="microsoft/phi-1_5",

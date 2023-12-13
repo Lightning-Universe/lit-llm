@@ -3,7 +3,7 @@ from pathlib import Path
 import shutil
 from typing import Optional
 
-from llm import download_model, finetune, prepare_dataset, setup_chat, chat, serve
+from lit import download_model, finetune, prepare_dataset, setup_chat, chat, serve
 
 
 class Dataset:
