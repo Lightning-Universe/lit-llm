@@ -193,7 +193,7 @@ class LLM:
             chat = None
             gc.collect()
 
-    def serve(self, temperature=0.2, device_ids=[0], port=8000, timeout_keep_alive=30, blocking=True):
+    def serve(self, temperature=0.2, device_ids=None, port=8000, timeout_keep_alive=30, blocking=True):
         serve(
             llm=self,
             temperature=temperature,

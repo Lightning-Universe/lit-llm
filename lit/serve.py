@@ -146,6 +146,9 @@ def serve(llm, temperature, device_ids, port=8000, timeout_keep_alive=30, blocki
     if not blocking:
         raise NotImplementedError
 
+    if device_ids is None:
+        device_ids = list(range(torch.cuda.device_count()))
+
     app.llm = llm
     app.temperature = temperature
     app.device_ids = device_ids
