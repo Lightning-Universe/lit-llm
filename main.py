@@ -15,7 +15,7 @@ def main():
     # To skip preparation, just create the get dataset directly:
     # alpaca = model.get_dataset("alpaca")
 
-    finetuned = model.finetune(dataset=alpaca, max_iter=10)
+    finetuned = model.finetune(dataset=alpaca, max_iter=512)
 
     print("Finetuning hyperparameters:")
     pprint(finetuned.hparams)
