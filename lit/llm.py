@@ -104,7 +104,7 @@ class LLM:
         eval_iters: int = 100,
         log_interval: int = 1,
     ):
-        # TODO: add "mode" argument to provide sets of defalts
+        # TODO: add "mode" argument to provide sets of defaults
 
         prefix = f"{self.model_name}-{dataset.name}-"
         existing_dirs = self.checkpoint_dir.parent.parent.glob(f"{prefix}*")
