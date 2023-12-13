@@ -4,3 +4,4 @@ tokenizers
 sentencepiece
 safetensors
 jsonargparse[signatures]
+bitsandbytes==0.41.0

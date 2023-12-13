@@ -16,21 +16,21 @@ def prepare_dataset(
         print("Please provide the name of the dataset (--dataset alpaca | dolly | csv).")
 
     if dataset == "alpaca":
-        from llm.datasets import prepare_alpaca
+        from lit.datasets import prepare_alpaca
         prepare_alpaca.prepare(
             checkpoint_dir=checkpoint_dir,
             destination_path=data_dir,
         )
 
     elif dataset == "dolly":
-        from llm.datasets import prepare_dolly
+        from lit.datasets import prepare_dolly
         prepare_dolly.prepare(
             checkpoint_dir=checkpoint_dir,
             destination_path=data_dir,
         )
 
     elif dataset == "csv":
-        from llm.datasets import prepare_csv
+        from lit.datasets import prepare_csv
         if not csv_path:
             print("Please provide a CSV file with fine-tuning data as the csv_path argument.")
             print("The CSV file must contain three columns: instruction, input and output.")

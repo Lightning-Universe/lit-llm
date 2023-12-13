@@ -7,12 +7,14 @@ def create_system_prompt(
         system_b, system_e,
         user_b, user_e,
         assistant_b, assistant_e,
-        inst_b="", inst_e="",
+        sys_in_user=False,
         default_system_message=""):
     
     def system_prompt(prompt, context=[]):
         out = []
         if default_system_message:
+            if sys_in_user:
+                out.append(user_b)
             out.append(system_b)
             out.append(default_system_message)
             out.append(system_e)
@@ -27,7 +29,8 @@ def create_system_prompt(
                     out.append(system_e)
 
             if message["role"] == "user":
-                out.append(user_b)
+                if out and out[-1] != system_e:
+                    out.append(user_b)
                 out.append(message["content"])
                 out.append(user_e)
 
@@ -136,7 +139,7 @@ def prompt_config(checkpoint_dir, tokenizer):
         #     " instead of answering something not correct. If you don't know the answer to a question, please don't"
         #     f" share false information.{e_sys} {{prompt}} {e_inst} "
         # )
-        system_prompt = create_system_prompt(" <<SYS>>", "<</SYS>> ", "", "", "", "", inst_b="[INST]", inst_e="[/INST]",
+        system_prompt = create_system_prompt(" <<SYS>>", "<</SYS>> ", "[INST]", "[/INST]", "", "", sys_in_user=True,
             default_system_message="You are a helpful, respectful and honest assistant. Always answer as helpfully as"
             " possible, while being safe.  Your answers should not include any harmful, unethical, racist, sexist,"
             " toxic, dangerous, or illegal content. Please ensure that your responses are socially unbiased and"
@@ -183,7 +186,7 @@ def prompt_config(checkpoint_dir, tokenizer):
         # Mistral does not: https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.1#instruction-format
         # b_inst, e_inst = "<s>[INST]", "[/INST]"
         # system_prompt = f"{b_inst} {{prompt}} {e_inst}"
-        system_prompt = create_system_prompt("", "", "", "", "", "", inst_b="<s>[INST]", inst_e="[/INST]")
+        system_prompt = create_system_prompt("", "", "<s>[INST]", "[/INST]", "", "")
         stop_tokens = ([tokenizer.eos_id],)
         return system_prompt, stop_tokens
 
@@ -214,4 +217,4 @@ def prompt_config(checkpoint_dir, tokenizer):
         return system_prompt, stop_tokens
 
     # default format
-    return "{prompt}", ([tokenizer.eos_id],)
+    return create_system_prompt("", "", "", "", "", ""), ([tokenizer.eos_id],)

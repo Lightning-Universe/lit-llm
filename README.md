@@ -33,16 +33,16 @@ Download and prepare the instruction-tuning dataset. To prepare the [Alpaca](htt
 alpaca = model.prepare_dataset("alpaca")
 ```
 
-Once you download and prepare the dataset once, you can create the dataset directly
+Once you download and prepare the dataset once, you can get the dataset directly
 
 ```python
-alpaca = llm.Dataset(name="alpaca", model_name=model)
+alpaca = model.get_dataset("alpaca")
 ```
 
 You can also prepare the [Dolly](https://www.databricks.com/blog/2023/04/12/dolly-first-open-commercially-viable-instruction-tuned-llm) dataset:
 
 ```python
-alpaca = llm.Dataset(name="dolly", model_name=model)
+alpaca = model.prepare_dataset("dolly")
 ```
 
 You can also bring your own CSV, in which case you can use (`dataset="csv"`).
@@ -81,7 +81,7 @@ with finetuned.chat(temperature=0.2) as chat:
 
 ### Start an API inference server
 
-You can serve each model through an API server this way
+You can serve each model through an OpenAI-compatible API server this way
 
 ```python
 finetuned.serve(port=8000)
@@ -96,5 +96,8 @@ python client.py "What do you think about pineapple pizza?"
 in a separate terminal, or equivalently make a cURL request
 
 ```bash
-curl -H "Content-Type: application/json" -H "X-API-KEY: 1234567890" -X POST -d '{"prompt":"What do you think about pineapple pizza?", "temperature": 0.2}' 127.0.0.1:8000/chat
+curl http://127.0.0.1:8000/v1/chat/completions -H "Content-Type: application/json" -H "X-API-KEY: 1234567890" -d '{
+     "messages": [{"role": "user", "content": "What do you think about pineapple pizza?"}],
+     "temperature": 0.7
+   }'
 ```

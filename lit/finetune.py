@@ -16,7 +16,8 @@ from lit_gpt.lora import (
     Config,
     lora_filter,
     mark_only_lora_as_trainable,
-    merge_lora_weights
+    merge_lora_weights,
+    dequantize_model
 )
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
@@ -78,7 +79,7 @@ def finetune(
     plugins = None
     if quantize and torch.cuda.is_available():
         dtype = {"16-true": torch.float16, "bf16-true": torch.bfloat16, "32-true": torch.float32}[precision]
-        plugins = BitsandbytesPrecision(quantize[4:], dtype)
+        plugins = BitsandbytesPrecision(quantize, dtype)
         precision = None
 
     # logger = CSVLogger(out_dir.parent, flush_logs_every_n_steps=log_interval)
@@ -228,6 +229,7 @@ def train(fabric, hparams):
 
     # Save the final checkpoint at the end of training
     merge_lora_weights(model)
+    dequantize_model(model)
 
     save_path = hparams.out_checkpoint
     fabric.print(f"Saving weights to {str(save_path)!r}")

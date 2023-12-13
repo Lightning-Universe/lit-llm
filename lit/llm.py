@@ -1,4 +1,5 @@
 from contextlib import contextmanager
+import gc
 from pathlib import Path
 import shutil
 from typing import Optional
@@ -109,7 +110,7 @@ class LLM:
         dataset,
         max_iter=1000,
         batch_size: int = 128,
-        micro_batch_size: int = 4,
+        micro_batch_size: int = 1,
         n_epochs: int = 3,
         learning_rate: float = 3e-4,
         max_seq_length: Optional[int] = 1024,
@@ -161,7 +162,10 @@ class LLM:
             save_interval=save_interval,
             eval_iters=eval_iters,
             log_interval=log_interval,
+            quantize="nf4-dq"
         )
+
+        gc.collect()
 
         hparams.save(out_checkpoint_dir)
 
@@ -178,7 +182,7 @@ class LLM:
             model_name=self.model_name,
             checkpoint=self.checkpoint_dir / self.checkpoint,
             temperature=temperature,
-            quantize="bnb.nf4-dq",
+            quantize="nf4-dq",
             precision="bf16-true",
         )
 
@@ -187,7 +191,7 @@ class LLM:
             yield chat
         finally:
             chat = None
-            # gc
+            gc.collect()
 
     def serve(self, temperature=0.2, device_ids=[0], port=8000, timeout_keep_alive=30, blocking=True):
         serve(
