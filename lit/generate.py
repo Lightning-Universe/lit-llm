@@ -141,8 +141,8 @@ def setup_chat(
             samples.
         checkpoint_dir: The checkpoint directory to load.
         quantize: Whether to quantize the model and using which method:
-            - bnb.nf4, bnb.nf4-dq, bnb.fp4, bnb.fp4-dq: 4-bit quantization from bitsandbytes
-            - bnb.int8: 8-bit quantization from bitsandbytes
+            - nf4: 4-bit float quantization from bitsandbytes
+            - nf4-dq: 4-bit float double quantization from bitsandbytes
             for more details, see https://github.com/Lightning-AI/lit-gpt/blob/main/tutorials/quantize.md
         precision: Indicates the Fabric precision setting to use.
         compile: Whether to use compilation to speed up token generation. Will increase startup time.
@@ -154,7 +154,7 @@ def setup_chat(
     precision = precision or get_default_supported_precision(training=False)
 
     plugins = None
-    if quantize is not None and quantize == "nf4":
+    if quantize is not None and quantize in ["nf4", "nf4-dq"]:
         if "mixed" in precision:
             raise ValueError("Quantization and mixed precision is not supported.")
         dtype = {"16-true": torch.float16, "bf16-true": torch.bfloat16, "32-true": torch.float32}[precision]
