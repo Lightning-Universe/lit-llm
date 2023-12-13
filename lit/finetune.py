@@ -17,7 +17,7 @@ from lit_gpt.lora import (
     lora_filter,
     mark_only_lora_as_trainable,
     merge_lora_weights,
-    dequantize_model
+    # dequantize_model
 )
 from lit_gpt.tokenizer import Tokenizer
 from lit_gpt.utils import (
@@ -229,6 +229,18 @@ def train(fabric, hparams):
 
     # Save the final checkpoint at the end of training
     merge_lora_weights(model)
+
+    def dequantize_model(model: GPT) -> None:
+        """Dequantizes pretrained weights of the model."""
+        import bitsandbytes as bnb
+
+        for module in model.modules():
+            if isinstance(module, LoRALinear):
+                weight = module.linear.weight
+                if weight.dtype == torch.uint8:
+                    dequantized_weight = bnb.functional.dequantize_4bit(weight.data, weight.quant_state)
+                    module.linear.weight = bnb.nn.Params4bit(dequantized_weight, requires_grad=False, **weight.__dict__)
+
     dequantize_model(model)
 
     save_path = hparams.out_checkpoint
