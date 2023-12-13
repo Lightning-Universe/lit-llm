@@ -202,18 +202,31 @@ def setup_chat(
     )
 
 
-def chat(*, fabric, model, tokenizer, system_prompt, stop_tokens, temperature, top_k, log_toks=True, prompt=""):
-    prompt = system_prompt.format(prompt=prompt)
+def chat(*, fabric, model, tokenizer, system_prompt, stop_tokens, temperature, top_k, log_toks=True, prompt="", context=[], usage={}):
+    prompt = system_prompt(prompt=prompt, context=context)
     encoded_prompt = tokenizer.encode(prompt, device=fabric.device)
+    n_prompt_tokens = len(encoded_prompt)
+    usage["prompt_tokens"] = n_prompt_tokens
     y = generate(
         model, encoded_prompt, model.max_seq_length, temperature=temperature, top_k=top_k, stop_tokens=stop_tokens
     )
     t0 = time.perf_counter()
     count = 0
-    generated = decode(fabric, tokenizer, y)
-    for word in generated:
+    decoded = decode(fabric, tokenizer, y)
+    context.append({
+        "role": "user",
+        "content": prompt
+    })
+    context.append({
+        "role": "assistant",
+        "content": ""
+    })
+
+    for token in decoded:
         count += 1
-        yield word
+        usage["total_tokens"] = n_prompt_tokens + count
+        context[-1]["content"] += token
+        yield token
     t = time.perf_counter() - t0
     
     for block in model.transformer.h:

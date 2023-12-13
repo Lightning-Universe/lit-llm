@@ -39,20 +39,36 @@ class Chat:
     def __init__(self, llm, config):
         self.llm = llm
         self.config = config
+        self.context = []
     
-    def generate(self, prompt="", temperature=None):
+    def generate(self, prompt="", temperature=None, do_print=True):
         config = self.config.copy()
         if temperature is not None:
             config["temperature"] = temperature
-        for word in chat(**config, prompt=prompt):
-            print(word, end="", flush=True)
-        print()
+        response = []
+        if do_print:
+            print(f">>> {prompt}")
+        for word in chat(**config, prompt=prompt, context=self.context, log_toks=not do_print):
+            if do_print:
+                print(word, end="", flush=True)
+            response.append(word)
+        if do_print:
+            print()
+        return "".join(response)
 
     def stream(self, prompt="", temperature=None):
         config = self.config.copy()
         if temperature is not None:
             config["temperature"] = temperature
-        return chat(**config, prompt=prompt)
+        return chat(**config, prompt=prompt, context=self.context)
+
+    def generate_with_context(self, context=[], temperature=None):
+        config = self.config.copy()
+        if temperature is not None:
+            config["temperature"] = temperature
+        usage = {}
+        text = "".join(chat(**config, prompt="", context=context, usage=usage))
+        return text, usage
 
 
 class LLM:
@@ -173,7 +189,7 @@ class LLM:
             chat = None
             # gc
 
-    def serve(self, temperature=0.2, device_ids=[0], port=8000, timeout_keep_alive=20, blocking=True):
+    def serve(self, temperature=0.2, device_ids=[0], port=8000, timeout_keep_alive=30, blocking=True):
         serve(
             llm=self,
             temperature=temperature,

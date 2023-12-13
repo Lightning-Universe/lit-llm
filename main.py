@@ -6,21 +6,24 @@ import lit
 def main():
     model = lit.LLM("microsoft/phi-1_5")
 
-    with model.chat(temperature=0.2) as chat:
-        response = chat.generate(prompt="What do you think about pineapple pizza?")
+    model.serve(port=8000)
 
-    alpaca = model.prepare_dataset("alpaca")
-    # # To skip preparation, just create the get dataset directly:
-    # alpaca = model.get_dataset("alpaca")
+    # with model.chat(temperature=0.2) as chat:
+    #     chat.generate(prompt="What do you think about pineapple pizza?")
+    #     chat.generate(prompt="Do you think it's better than ham?")
 
-    finetuned = model.finetune(dataset=alpaca, max_iter=100)
+    # alpaca = model.prepare_dataset("alpaca")
+    # # # To skip preparation, just create the get dataset directly:
+    # # alpaca = model.get_dataset("alpaca")
 
-    pprint(finetuned.hparams)
+    # finetuned = model.finetune(dataset=alpaca, max_iter=100)
 
-    with finetuned.chat(temperature=0.2) as chat:
-        response = chat.generate(prompt="What do you think about pineapple pizza?")
+    # pprint(finetuned.hparams)
 
-    finetuned.serve(port=8000)
+    # with finetuned.chat(temperature=0.2) as chat:
+    #     chat.generate(prompt="What do you think about pineapple pizza?")
+
+    # finetuned.serve(port=8000)
 
     # a server has just spun up for you. Now run
     # python client.py "What do you think about pineapple pizza?"
