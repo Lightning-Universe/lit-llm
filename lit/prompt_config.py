@@ -217,4 +217,4 @@ def prompt_config(checkpoint_dir, tokenizer):
         return system_prompt, stop_tokens
 
     # default format
-    return create_system_prompt("", "", "", "", "", ""), ([tokenizer.eos_id],)
+    return create_system_prompt("", "", "\n", "\n", "", ""), ([tokenizer.eos_id],)
