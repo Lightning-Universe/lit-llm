@@ -8,10 +8,11 @@ The design principle is to introduce the thinnest possible abstraction, and at t
 
 Current features include:
 
-- load/download/convert models by specifying a string identifier (e.g. `microsoft/phi-1_5`)
-- finetune with a single command
-- chat with context
-- expose OpenAI-compatible HTTP endpoints
+- loading/downloading/converting models by specifying a string identifier (e.g. `microsoft/phi-1_5`)
+- preparing datasets with awareness of target models (tokenizer, etc)
+- finetuning with a single command
+- chatting with context
+- exposing OpenAI-compatible HTTP endpoints
 
 ## Usage
 
