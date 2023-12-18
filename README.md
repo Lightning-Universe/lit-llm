@@ -1,4 +1,17 @@
-# lit-LLM: High-Level API for LLMs
+# Lit-LLM: High-Level API for LLMs
+
+Lit-LLM implements an accessible API to lit-gpt and potentially other model implementations.
+
+The design principle is to introduce the thinnest possible abstraction, and at the same time keep things simple and hackable.
+
+## Features
+
+Current features include:
+
+- load/download/convert models by specifying a string identifier (e.g. `microsoft/phi-1_5`)
+- finetune with a single command
+- chat with context
+- expose OpenAI-compatible HTTP endpoints
 
 ## Usage
 
