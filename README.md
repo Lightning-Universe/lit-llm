@@ -1,8 +1,10 @@
 # Lit-LLM: High-Level API for LLMs
 
-Lit-LLM implements an accessible API to lit-gpt and potentially other model implementations.
+Lit-LLM implements an accessible API to operate with LLMs.
 
 The design principle is to introduce the thinnest possible abstraction, and at the same time keep things simple and hackable.
+
+The first implementation focuses on lit-gpt, but adding support for more is trivial.
 
 ## Features
 
