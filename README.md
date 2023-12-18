@@ -1,8 +1,4 @@
-# LLM Finetune Quest
-
-This studio lets you fine-tune a Phi 1.5 base model using instruction-tuning data.
-
-Phi 1.5 is a 1.3B parameter model created by Microsoft ([technical report](https://www.microsoft.com/en-us/research/publication/textbooks-are-all-you-need-ii-phi-1-5-technical-report/)). Phi 1.5 is competitive with many larger models up to 10B in size.
+# lit-LLM: High-Level API for LLMs
 
 ## Usage
 
@@ -58,7 +54,7 @@ instruction input output
 
 and pass it as the `csv_path=<data.csv>` argument to the function.
 
-### Fine-tune the base Phi 1.5 model on the dataset
+### Fine-tune the base model on the dataset
 
 You can now fine-tune your model on the data. Finetuning will automatically run across all available GPUs.
 
