@@ -1,7 +1,8 @@
-lit_gpt @ git+https://github.com/Lightning-AI/lit-gpt
+lit_gpt @ git+https://github.com/Lightning-AI/lit-gpt@608e8ed614a0c8cc3ef81a26e4f3df77db6262b8
 huggingface_hub
 tokenizers
 sentencepiece
 safetensors
 jsonargparse[signatures]
 bitsandbytes==0.41.0
+scipy
