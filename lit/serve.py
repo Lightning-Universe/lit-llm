@@ -22,11 +22,6 @@ X_API_KEY = APIKeyHeader(name='X-API-Key')
 LIT_SERVER_API_KEY = os.environ.get("LIT_SERVER_API_KEY", "1234567890")
 
 
-class ChatRequest(BaseModel):
-    prompt: str
-    temperature: float
-
-
 def inference_worker(llm, temperature, device_id, worker_id, request_buffer, response_buffer):
     with llm.chat(temperature=temperature) as chat:
         print(f"Done loading, server ready", file=sys.stderr)
