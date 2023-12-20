@@ -1,5 +1,4 @@
 from pathlib import Path
-import sys
 
 
 def prepare_dataset(

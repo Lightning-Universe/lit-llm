@@ -1,6 +1,5 @@
 import gc
 import json
-import sys
 from dataclasses import asdict
 from functools import partial
 from pathlib import Path

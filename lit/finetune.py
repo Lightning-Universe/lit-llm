@@ -1,12 +1,10 @@
-import os
 from pathlib import Path
-import sys
 import time
 from typing import Optional, Literal
 
 import lightning as L
 import torch
-from lightning.fabric.loggers import CSVLogger, TensorBoardLogger
+from lightning.fabric.loggers import TensorBoardLogger
 from lightning.fabric.strategies import FSDPStrategy
 from lightning.fabric.plugins import BitsandbytesPrecision
 
@@ -81,7 +79,6 @@ def finetune(
         plugins = BitsandbytesPrecision(quantize, dtype)
         precision = None
 
-    # logger = CSVLogger(out_dir.parent, flush_logs_every_n_steps=log_interval)
     logger = TensorBoardLogger(root_dir=out_dir.parent)
 
     fabric = L.Fabric(strategy=strategy, precision=precision, loggers=logger, plugins=plugins)

@@ -4,7 +4,6 @@ import lit
 
 
 def main():
-    # model = lit.LLM("microsoft/phi-1_5")
     model = lit.LLM("mistralai/Mistral-7B-Instruct-v0.1")
 
     with model.chat(temperature=0.2) as chat:

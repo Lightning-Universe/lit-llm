@@ -10,9 +10,7 @@ from typing import List, Dict
 import torch
 
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
-from fastapi.responses import Response
 from fastapi.security import APIKeyHeader
-from pydantic import BaseModel
 import uvicorn
 
 from lit.oai_protocol import ChatCompletionRequest, ChatCompletionResponse, \

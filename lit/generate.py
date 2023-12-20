@@ -1,7 +1,7 @@
 import sys
 import time
 from pathlib import Path
-from typing import Iterator, List, Literal, Optional, Tuple, Any, Callable
+from typing import Iterator, List, Literal, Optional, Tuple, Any
 
 import lightning as L
 import torch
@@ -11,7 +11,6 @@ from lit_gpt import GPT, Config, Tokenizer
 from lit_gpt.utils import (
     check_valid_checkpoint_dir,
     get_default_supported_precision,
-    gptq_quantization,
     load_checkpoint,
 )
 

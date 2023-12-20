@@ -1,6 +1,5 @@
 """Implementation derived from https://github.com/tloen/alpaca-lora"""
 import json
-import sys
 from pathlib import Path
 from typing import Optional
 
