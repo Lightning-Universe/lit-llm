@@ -7,13 +7,14 @@ import time
 import uuid
 from typing import List, Dict
 
+import torch
+
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import Response
 from fastapi.security import APIKeyHeader
-import uvicorn
 from pydantic import BaseModel
+import uvicorn
 
-import lit.generate as generate
 from lit.oai_protocol import ChatCompletionRequest, ChatCompletionResponse, \
     ChatCompletionResponseChoice, ChatMessage, UsageInfo
 
